@@ -41,6 +41,7 @@ Error:
 |------|------|---------|
 | 400 | `BAD_REQUEST` | Invalid request body/query/params (validation) |
 | 401 | `UNAUTHORIZED` | Missing/invalid/expired token, or bad credentials |
+| 403 | `FORBIDDEN` | Authenticated but not permitted (role-based access control) |
 | 404 | `NOT_FOUND` | Route not found, or resource that is not yours (identical message) |
 | 409 | `CONFLICT` | Duplicate email / unique violation |
 | 429 | `RATE_LIMITED` | Too many requests (`Retry-After` header set) |
@@ -88,11 +89,13 @@ Rules: `fullName` required (non-empty, ≤100); `email` valid format, unique; `p
   "success": true,
   "message": "Registration successful",
   "data": {
-    "user": { "id": "...", "fullName": "Jane Doe", "email": "jane@example.com", "createdAt": "...", "updatedAt": "..." },
+    "user": { "id": "...", "fullName": "Jane Doe", "email": "jane@example.com", "role": "MEMBER", "createdAt": "...", "updatedAt": "..." },
     "token": "eyJhbGciOi..."
   }
 }
 ```
+
+New users always get `role: "MEMBER"` — the API never accepts a role from the client (no privilege escalation).
 
 Conflict → `409 CONFLICT` "Email is already registered".
 
@@ -129,8 +132,63 @@ Clear the auth cookie. Requires authentication.
 Current authenticated user.
 
 ```json
-{ "success": true, "message": "Current user retrieved", "data": { "user": { "id": "...", "fullName": "Jane Doe", "email": "jane@example.com" } } }
+{ "success": true, "message": "Current user retrieved", "data": { "user": { "id": "...", "fullName": "Jane Doe", "email": "jane@example.com", "role": "MEMBER" } } }
 ```
+
+---
+
+## 5. Admin (RBAC)
+
+Every endpoint under `/api/admin` requires authentication **and** the `ADMIN` role. Non-admins get `403 FORBIDDEN`.
+
+Roles: `ADMIN` (platform access) and `MEMBER` (default; owns their own projects/tasks). Applies to all admin endpoints below and rejected via `requireRole('ADMIN')` middleware.
+
+### GET /api/admin/users
+
+List all users (admin only). Useful for user administration.
+
+| Param | Type | Notes |
+|-------|------|-------|
+| `search` | string | case-insensitive match on `fullName` or `email` |
+| `page`, `limit` | int | pagination (`limit` max 100) |
+
+```bash
+curl -s -b cookies.txt "http://localhost:5000/api/admin/users?search=jane&page=1&limit=10"
+```
+
+`200` envelope with `{ items: [{ id, fullName, email, role, createdAt, updatedAt }], pagination: {...} }`.
+
+### PATCH /api/admin/users/:id/role
+
+Change a user's role (admin only).
+
+```json
+{ "role": "ADMIN" }
+```
+
+`200` → the updated user. `400` if you try to change your own role; `404` if the user does not exist; `400` on an invalid role value.
+
+```bash
+curl -s -b cookies.txt -X PATCH http://localhost:5000/api/admin/users/<id>/role \
+  -H 'Content-Type: application/json' -d '{"role":"ADMIN"}'
+```
+
+### GET /api/admin/audit-logs
+
+Browse the audit trail (admin only). Logs record `AUTH_REGISTER`, `AUTH_LOGIN`, `AUTH_LOGIN_FAILED`, `AUTH_LOGOUT`, `PROJECT_CREATE/UPDATE/DELETE`, `TASK_CREATE/UPDATE/DELETE/COMPLETE`, `USER_ROLE_CHANGED` events with actor, IP, user-agent and metadata.
+
+| Param | Type | Notes |
+|-------|------|-------|
+| `action` | string | exact action name to filter by |
+| `resource` | string | `USER` \| `PROJECT` \| `TASK` |
+| `userId` | string | filter to a single actor |
+| `page`, `limit` | int | pagination (`limit` max 100) |
+
+```bash
+curl -s -b cookies.txt "http://localhost:5000/api/admin/audit-logs?resource=PROJECT&page=1&limit=20"
+```
+
+`200` envelope with `{ items: [{ id, userId, action, resource, resourceId, meta, ip, userAgent, createdAt, user }], pagination: {...} }`.
 
 ---
 
@@ -220,7 +278,7 @@ Delete the project. **Tasks are cascade-deleted** (`onDelete: Cascade`, enforced
 
 ---
 
-## 5. Tasks
+## 6. Tasks
 
 All endpoints require authentication. Tasks always belong to a project owned by the current user.
 
@@ -281,7 +339,7 @@ Owner only; else `404`. `200` → `{ "success": true, "message": "Task deleted" 
 
 ---
 
-## 6. Dashboard
+## 7. Dashboard
 
 ### GET /api/dashboard/stats
 
@@ -308,16 +366,18 @@ All statistics computed **only** from the authenticated user's data.
 
 `pendingTasks` = tasks with status `PENDING` or `IN_PROGRESS`.
 
-## 7. Rate Limiting
+## 8. Rate Limiting
 
 - `POST /api/auth/*` → stricter limiter (defaults generous, relaxed to 1000/15 min in test mode).
 - Other `/api/*` routes → global limiter (`RATE_LIMIT_WINDOW_MS` / `RATE_LIMIT_MAX`).
 
 Exceeded → `429 RATE_LIMITED` with `Retry-After`.
 
-## 8. Design Notes
+## 9. Design Notes
 
 - **Cookie vs Bearer** — the frontend uses the HttpOnly cookie (`withCredentials`). The Bearer fallback exists for pure-HTTP clients / cross-origin scenarios; with it, "logout" means the client discards the token.
 - **Ownership scoping in the DB** — every query carries the owner in the Prisma `where` (`{ id, userId }` and `{ project: { userId } }`), so cross-user data can never be resolved.
 - **Duplicates** → `409`. **Validation** → `400` with Zod issue details. **Unknown route** → `404`.
 - **Headers** — `helmet` security headers; CORS restricted to `CLIENT_ORIGINS`; `pino-http` request logging.
+- **Audit trail** — every auth, project, task and role mutation writes an `AuditLog` row (actor, action, resource, IP, user-agent, metadata). Audit writes are fire-and-forget: a logging failure never fails the request it accompanies.
+- **Live role checks** — role changes take effect immediately because the auth middleware reads the current role from the DB on every request (the JWT only carries the user id).

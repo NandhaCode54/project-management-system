@@ -4,6 +4,7 @@ const app = require('../src/app');
 const db = require('../src/config/db');
 
 async function resetDatabase() {
+  await db.auditLog.deleteMany();
   await db.task.deleteMany();
   await db.project.deleteMany();
   await db.user.deleteMany();

@@ -2,7 +2,7 @@ const db = require('../config/db');
 const env = require('../config/env');
 const { verifyAccessToken } = require('../utils/jwt');
 const asyncHandler = require('../utils/asyncHandler');
-const { unauthorized } = require('../utils/httpErrors');
+const { unauthorized, forbidden } = require('../utils/httpErrors');
 
 function extractToken(req) {
   if (req.cookies && req.cookies[env.jwt.cookieName]) {
@@ -31,7 +31,7 @@ const authMiddleware = asyncHandler(async (req, res, next) => {
 
   const user = await db.user.findUnique({
     where: { id: payload.sub },
-    select: { id: true, fullName: true, email: true },
+    select: { id: true, fullName: true, email: true, role: true },
   });
 
   if (!user) {
@@ -42,4 +42,13 @@ const authMiddleware = asyncHandler(async (req, res, next) => {
   next();
 });
 
-module.exports = { authMiddleware, extractToken };
+function requireRole(...roles) {
+  return asyncHandler(async (req, res, next) => {
+    if (!req.user || !roles.includes(req.user.role)) {
+      throw forbidden('You do not have permission to perform this action');
+    }
+    next();
+  });
+}
+
+module.exports = { authMiddleware, requireRole, extractToken };

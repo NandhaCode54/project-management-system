@@ -1,5 +1,6 @@
 const projectService = require('../services/projectService');
 const asyncHandler = require('../utils/asyncHandler');
+const { recordAudit } = require('../utils/audit');
 const { toPublicProject, toPublicTask } = require('../utils/serializers');
 const { paginate } = require('../utils/pagination');
 
@@ -31,6 +32,14 @@ const getProject = asyncHandler(async (req, res) => {
 
 const createProject = asyncHandler(async (req, res) => {
   const project = await projectService.createProject(req.user.id, req.body);
+  await recordAudit({
+    userId: req.user.id,
+    action: 'PROJECT_CREATE',
+    resource: 'PROJECT',
+    resourceId: project.id,
+    meta: { name: project.name },
+    req,
+  });
   res.status(201).json({
     success: true,
     message: 'Project created',
@@ -40,6 +49,14 @@ const createProject = asyncHandler(async (req, res) => {
 
 const updateProject = asyncHandler(async (req, res) => {
   const project = await projectService.updateProject(req.params.id, req.user.id, req.body);
+  await recordAudit({
+    userId: req.user.id,
+    action: 'PROJECT_UPDATE',
+    resource: 'PROJECT',
+    resourceId: project.id,
+    meta: { name: project.name },
+    req,
+  });
   res.json({
     success: true,
     message: 'Project updated',
@@ -49,6 +66,14 @@ const updateProject = asyncHandler(async (req, res) => {
 
 const deleteProject = asyncHandler(async (req, res) => {
   const project = await projectService.deleteProject(req.params.id, req.user.id);
+  await recordAudit({
+    userId: req.user.id,
+    action: 'PROJECT_DELETE',
+    resource: 'PROJECT',
+    resourceId: project.id,
+    meta: { name: project.name },
+    req,
+  });
   res.json({
     success: true,
     message: 'Project deleted',

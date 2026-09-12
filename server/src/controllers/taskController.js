@@ -1,5 +1,6 @@
 const taskService = require('../services/taskService');
 const asyncHandler = require('../utils/asyncHandler');
+const { recordAudit } = require('../utils/audit');
 const { toTaskWithProject } = require('../utils/serializers');
 const { paginate } = require('../utils/pagination');
 
@@ -23,6 +24,14 @@ const getTask = asyncHandler(async (req, res) => {
 
 const createTask = asyncHandler(async (req, res) => {
   const task = await taskService.createTask(req.user.id, req.body);
+  await recordAudit({
+    userId: req.user.id,
+    action: 'TASK_CREATE',
+    resource: 'TASK',
+    resourceId: task.id,
+    meta: { name: task.name, projectId: task.projectId },
+    req,
+  });
   res.status(201).json({
     success: true,
     message: 'Task created',
@@ -32,6 +41,14 @@ const createTask = asyncHandler(async (req, res) => {
 
 const updateTask = asyncHandler(async (req, res) => {
   const task = await taskService.updateTask(req.params.id, req.user.id, req.body);
+  await recordAudit({
+    userId: req.user.id,
+    action: 'TASK_UPDATE',
+    resource: 'TASK',
+    resourceId: task.id,
+    meta: { name: task.name, projectId: task.projectId },
+    req,
+  });
   res.json({
     success: true,
     message: 'Task updated',
@@ -41,15 +58,31 @@ const updateTask = asyncHandler(async (req, res) => {
 
 const deleteTask = asyncHandler(async (req, res) => {
   const task = await taskService.deleteTask(req.params.id, req.user.id);
+  await recordAudit({
+    userId: req.user.id,
+    action: 'TASK_DELETE',
+    resource: 'TASK',
+    resourceId: req.params.id,
+    meta: { name: task.name },
+    req,
+  });
   res.json({
     success: true,
     message: 'Task deleted',
-    data: { id: task.id },
+    data: { id: req.params.id },
   });
 });
 
 const completeTask = asyncHandler(async (req, res) => {
   const task = await taskService.completeTask(req.params.id, req.user.id);
+  await recordAudit({
+    userId: req.user.id,
+    action: 'TASK_COMPLETE',
+    resource: 'TASK',
+    resourceId: task.id,
+    meta: { name: task.name, projectId: task.projectId },
+    req,
+  });
   res.json({
     success: true,
     message: 'Task marked as completed',

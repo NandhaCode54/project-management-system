@@ -4,8 +4,25 @@ function toPublicUser(user) {
     id: user.id,
     fullName: user.fullName,
     email: user.email,
+    role: user.role,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
+  };
+}
+
+function toPublicAuditLog(log) {
+  if (!log) return null;
+  return {
+    id: log.id,
+    userId: log.userId,
+    action: log.action,
+    resource: log.resource,
+    resourceId: log.resourceId,
+    meta: log.meta,
+    ip: log.ip,
+    userAgent: log.userAgent,
+    createdAt: log.createdAt,
+    user: log.user ? { id: log.user.id, fullName: log.user.fullName, email: log.user.email } : null,
   };
 }
 
@@ -47,4 +64,4 @@ function toTaskWithProject(task) {
   };
 }
 
-module.exports = { toPublicUser, toPublicProject, toPublicTask, toTaskWithProject };
+module.exports = { toPublicUser, toPublicAuditLog, toPublicProject, toPublicTask, toTaskWithProject };

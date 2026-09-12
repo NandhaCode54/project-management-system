@@ -25,17 +25,41 @@ enum TaskPriority {
   HIGH
 }
 
+enum UserRole {
+  ADMIN
+  MEMBER
+}
+
 model User {
   id           String    @id @default(cuid())
   fullName     String
   email        String    @unique
   passwordHash String
+  role         UserRole  @default(MEMBER)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
-  projects Project[]
+  projects  Project[]
+  auditLogs AuditLog[]
 
   @@index([email])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action     String
+  resource   String
+  resourceId String?
+  meta       Json?
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([resource])
+  @@index([createdAt])
 }
 
 model Project {

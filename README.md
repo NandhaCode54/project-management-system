@@ -11,6 +11,8 @@ A full-stack project & task management application built for a technical assessm
 ## Features
 
 - Full auth: register / login / logout / me (JWT in HttpOnly cookie; Bearer fallback; uniform 401 on bad credentials — no user enumeration)
+- **Role-Based Access Control:** `ADMIN` / `MEMBER` roles; `ADMIN`-only `/api/admin/*` endpoints (list users, change roles), enforced by `requireRole` middleware with live DB lookups
+- **Audit logs:** every auth, project, task and role mutation is recorded (actor, action, resource, IP, user-agent, metadata) and browsable via `GET /api/admin/audit-logs`
 - **Owner-scoped data:** a user can never read, update or delete another user's projects or tasks (cross-user access → 404)
 - Projects: create / list (search, status filter, sort, pagination) / detail with tasks / update / delete (cascades tasks)
 - Tasks: create / list (search, status, priority, project filters, sort, pagination) / detail / update / quick-complete / delete
@@ -107,10 +109,11 @@ npm run db:seed       # creates the demo user
 npm run dev           # API on :5000 + client dev server on :5173 (proxy → /api)
 ```
 
-Open http://localhost:5173 and log in with the seeded demo account:
+Open http://localhost:5173 and log in with a seeded demo account:
 
 ```
-Email:    demo@example.com
+Email:    demo@example.com   (regular user)
+          admin@example.com  (ADMIN role — shows /api/admin/* access)
 Password: password123
 ```
 
