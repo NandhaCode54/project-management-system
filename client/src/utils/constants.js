@@ -1,19 +1,19 @@
 export const PROJECT_STATUS = {
-  NOT_STARTED: { label: 'Not Started', color: 'bg-slate-100 text-slate-700', dot: 'bg-slate-400' },
-  IN_PROGRESS: { label: 'In Progress', color: 'bg-blue-50 text-blue-700', dot: 'bg-blue-500' },
-  COMPLETED: { label: 'Completed', color: 'bg-emerald-50 text-emerald-700', dot: 'bg-emerald-500' },
+  NOT_STARTED: { label: 'Not Started', color: 'bg-slate-100 text-slate-700', dot: 'bg-slate-400', chart: '#64748b' },
+  IN_PROGRESS: { label: 'In Progress', color: 'bg-blue-50 text-blue-700', dot: 'bg-blue-500', chart: '#3b82f6' },
+  COMPLETED: { label: 'Completed', color: 'bg-emerald-50 text-emerald-700', dot: 'bg-emerald-500', chart: '#10b981' },
 };
 
 export const TASK_STATUS = {
-  PENDING: { label: 'Pending', color: 'bg-amber-50 text-amber-700', dot: 'bg-amber-500' },
-  IN_PROGRESS: { label: 'In Progress', color: 'bg-blue-50 text-blue-700', dot: 'bg-blue-500' },
-  COMPLETED: { label: 'Completed', color: 'bg-emerald-50 text-emerald-700', dot: 'bg-emerald-500' },
+  PENDING: { label: 'Pending', color: 'bg-amber-50 text-amber-700', dot: 'bg-amber-500', chart: '#f59e0b' },
+  IN_PROGRESS: { label: 'In Progress', color: 'bg-blue-50 text-blue-700', dot: 'bg-blue-500', chart: '#3b82f6' },
+  COMPLETED: { label: 'Completed', color: 'bg-emerald-50 text-emerald-700', dot: 'bg-emerald-500', chart: '#10b981' },
 };
 
 export const TASK_PRIORITY = {
-  LOW: { label: 'Low', color: 'bg-slate-100 text-slate-700' },
-  MEDIUM: { label: 'Medium', color: 'bg-amber-50 text-amber-700' },
-  HIGH: { label: 'High', color: 'bg-rose-50 text-rose-700' },
+  LOW: { label: 'Low', color: 'bg-slate-100 text-slate-700', chart: '#94a3b8' },
+  MEDIUM: { label: 'Medium', color: 'bg-amber-50 text-amber-700', chart: '#f59e0b' },
+  HIGH: { label: 'High', color: 'bg-rose-50 text-rose-700', chart: '#f43f5e' },
 };
 
 export const SORT_BY_PROJECT = [

@@ -58,7 +58,11 @@ function errorHandler(err, req, res, next) {
   if (statusCode >= 500) {
     logger.error({ err }, 'Unhandled error');
   } else if (!envIsTest) {
-    logger.warn({ err }, 'Request error');
+    if (statusCode === 401 || statusCode === 404) {
+      logger.debug({ status: statusCode, code, message }, 'Request error');
+    } else {
+      logger.warn({ err }, 'Request error');
+    }
   }
 
   return res.status(statusCode).json({

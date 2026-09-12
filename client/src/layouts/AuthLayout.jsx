@@ -1,7 +1,7 @@
 import { FolderKanban } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, Outlet } from 'react-router-dom';
 
-export function AuthLayout({ children }) {
+export function AuthLayout() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-50 via-slate-50 to-slate-100 p-4">
       <div className="w-full max-w-md">
@@ -14,7 +14,7 @@ export function AuthLayout({ children }) {
             <p className="text-xs text-slate-500">Organize work, ship faster</p>
           </div>
         </div>
-        {children}
+        <Outlet />
         <p className="mt-6 text-center text-xs text-slate-400">
           <Link to="/" className="inline-flex items-center text-indigo-600 hover:text-indigo-500">
             Back to app

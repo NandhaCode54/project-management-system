@@ -5,6 +5,8 @@ const AuthContext = createContext(null);
 
 const STORAGE_KEY = 'pms_user';
 
+let sessionRestoreStarted = false;
+
 function readStoredUser() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -16,9 +18,15 @@ function readStoredUser() {
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(readStoredUser);
-  const [initializing, setInitializing] = useState(true);
+  const [initializing, setInitializing] = useState(() => !sessionRestoreStarted);
 
   useEffect(() => {
+    if (sessionRestoreStarted) {
+      setInitializing(false);
+      return undefined;
+    }
+    sessionRestoreStarted = true;
+
     let active = true;
 
     async function restoreSession() {

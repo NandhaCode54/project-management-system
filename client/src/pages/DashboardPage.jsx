@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { FolderKanban, ListTodo, CheckCircle2, Hourglass, TrendingUp } from 'lucide-react';
+import { FolderKanban, ListTodo, CheckCircle2, Hourglass, TrendingUp, ChartColumn } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
 
 import api from '../services/api';
@@ -19,7 +19,11 @@ const STAT_CARDS = [
 ];
 
 function toChartData(distribution, meta) {
-  return Object.entries(distribution || {}).map(([key, value]) => ({ name: meta[key]?.label || key, value, fill: meta[key]?.color }));
+  return Object.entries(distribution || {}).map(([key, value]) => ({
+    name: meta[key]?.label || key,
+    value,
+    fill: meta[key]?.chart || '#94a3b8',
+  }));
 }
 
 export default function DashboardPage() {
@@ -50,7 +54,7 @@ export default function DashboardPage() {
           </p>
         </div>
         <button onClick={refetch} className="btn-secondary" disabled={loading}>
-          {loading ? <Spinner className="h-4 w-4" /> : <BarChart3 className="h-4 w-4" />}
+          {loading ? <Spinner className="h-4 w-4" /> : <ChartColumn className="h-4 w-4" />}
           Refresh
         </button>
       </div>

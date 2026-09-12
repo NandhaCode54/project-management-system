@@ -1,3 +1,5 @@
+import { Spinner } from './Spinner';
+
 export function Button({ variant = 'primary', type = 'button', loading, className = '', children, ...props }) {
   const variants = {
     primary: 'btn-primary',
@@ -13,4 +15,4 @@ export function Button({ variant = 'primary', type = 'button', loading, classNam
   );
 }
 
-export { Spinner } from './Spinner';
+export { Spinner };
