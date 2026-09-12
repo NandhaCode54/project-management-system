@@ -35,7 +35,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="card p-8">
+    <div className="auth-card p-6 sm:p-8">
       <h2 className="text-xl font-semibold text-slate-900">Sign in to your account</h2>
       <p className="mt-1 text-sm text-slate-500">Enter your credentials to continue.</p>
 
