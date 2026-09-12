@@ -1,11 +1,12 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { PrivateRoute, PublicOnlyRoute } from './guards';
+import { PrivateRoute, PublicOnlyRoute, AdminRoute } from './guards';
 import { MainLayout } from '../layouts/MainLayout';
 import { AuthLayout } from '../layouts/AuthLayout';
 import DashboardPage from '../pages/DashboardPage';
 import ProjectsPage from '../pages/ProjectsPage';
 import ProjectDetailsPage from '../pages/ProjectDetailsPage';
 import TasksPage from '../pages/TasksPage';
+import AdminPage from '../pages/AdminPage';
 import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
 import NotFoundPage from '../pages/NotFoundPage';
@@ -27,6 +28,9 @@ export default function AppRoutes() {
           <Route path="/projects" element={<ProjectsPage />} />
           <Route path="/projects/:id" element={<ProjectDetailsPage />} />
           <Route path="/tasks" element={<TasksPage />} />
+          <Route element={<AdminRoute />}>
+            <Route path="/admin" element={<AdminPage />} />
+          </Route>
         </Route>
       </Route>
 

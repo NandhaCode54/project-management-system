@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { FolderKanban, LayoutDashboard, ListTodo, LogOut, Menu, X } from 'lucide-react';
+import { FolderKanban, LayoutDashboard, ListTodo, LogOut, Menu, ShieldCheck, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/projects', label: 'Projects', icon: FolderKanban },
   { to: '/tasks', label: 'Tasks', icon: ListTodo },
+  { to: '/admin', label: 'Admin', icon: ShieldCheck, adminOnly: true },
 ];
 
 function initials(fullName) {
@@ -36,7 +37,7 @@ export function MainLayout() {
         </div>
       </div>
       <nav className="mt-2 flex-1 space-y-1 px-3">
-        {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
+        {NAV_ITEMS.filter((item) => !item.adminOnly || user?.role === 'ADMIN').map(({ to, label, icon: Icon, end }) => (
           <NavLink
             key={to}
             to={to}

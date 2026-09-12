@@ -12,6 +12,16 @@ export function PrivateRoute() {
   return <Outlet />;
 }
 
+export function AdminRoute() {
+  const { user, initializing } = useAuth();
+
+  if (initializing) return <FullPageLoader />;
+  if (!user) return <Navigate to="/login" replace />;
+  if (user.role !== 'ADMIN') return <Navigate to="/dashboard" replace />;
+
+  return <Outlet />;
+}
+
 export function PublicOnlyRoute() {
   const { user, initializing } = useAuth();
 
